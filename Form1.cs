@@ -123,7 +123,14 @@ namespace ParentLock
 
         private void btn1Hour_Click(object sender, EventArgs e)
         {
-            _mTempUnlock = DateTime.Now + TimeSpan.FromHours(1);
+            if (_mTempUnlock < DateTime.Now)
+            {
+                _mTempUnlock = DateTime.Now + TimeSpan.FromHours(1);
+            }
+            else
+            {
+                _mTempUnlock = _mTempUnlock + TimeSpan.FromHours(1);
+            }
             txtPassword.Text = "";
             _mUnlocked = false;
             Lock();
@@ -131,7 +138,14 @@ namespace ParentLock
 
         private void btn30Min_Click(object sender, EventArgs e)
         {
-            _mTempUnlock = DateTime.Now + TimeSpan.FromMinutes(30);
+            if (_mTempUnlock < DateTime.Now)
+            {
+                _mTempUnlock = DateTime.Now + TimeSpan.FromMinutes(30);
+            }
+            else
+            {
+                _mTempUnlock = _mTempUnlock + TimeSpan.FromMinutes(30);
+            }
             txtPassword.Text = "";
             _mUnlocked = false;
             Lock();
@@ -152,9 +166,19 @@ namespace ParentLock
             Application.Exit();
         }
 
+        private bool IsWeekDay()
+        {
+            return (DateTime.Now.DayOfWeek == DayOfWeek.Monday ||
+                DateTime.Now.DayOfWeek == DayOfWeek.Tuesday ||
+                DateTime.Now.DayOfWeek == DayOfWeek.Wednesday ||
+                DateTime.Now.DayOfWeek == DayOfWeek.Thursday ||
+                DateTime.Now.DayOfWeek == DayOfWeek.Friday);
+        }
+
         private void timer1_Tick(object sender, EventArgs e)
         {
-            if (DateTime.Now.Hour >= _mHourAwake &&
+            if (IsWeekDay() &&
+                DateTime.Now.Hour >= _mHourAwake &&
                 DateTime.Now.Hour < _mHourAsleep)
             {
                 Unlock();
