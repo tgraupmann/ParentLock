@@ -13,6 +13,8 @@ namespace ParentLock
         private bool _mCancelExit = true;
         private string _mPassword = "1111"; //default password
         private DateTime _mTempUnlock = DateTime.MinValue;
+        private int _mHourAwake = 6;
+        private int _mHourAsleep = 22;
 
         private const string KEY_PARENT_LOCK = "PARENT_LOCK";
         private const string KEY_PARENT_LOCK_PASSWORD = "PARENT_LOCK_PASSWORD";
@@ -67,7 +69,6 @@ namespace ParentLock
 
             Lock();
             UpdateLayout();
-            Mute();
 
             this.timer1.Start();
         }
@@ -153,7 +154,25 @@ namespace ParentLock
 
         private void timer1_Tick(object sender, EventArgs e)
         {
-            if (DateTime.Now < _mTempUnlock)
+            if (DateTime.Now.Hour >= _mHourAwake &&
+                DateTime.Now.Hour < _mHourAsleep)
+            {
+                Unlock();
+                DateTime asleep = DateTime.Now.Date + TimeSpan.FromHours(_mHourAsleep);
+                TimeSpan timeleft = asleep - DateTime.Now;
+                if (timeleft.Hours > 0)
+                {
+                    lblPassword.Text = string.Format("NORMAL USE - TIME {0} HOURS {1} MINUTES",
+                        timeleft.Hours, timeleft.Minutes);
+                }
+                else
+                {
+                    lblPassword.Text = string.Format("NORMAL USE - TIME {0} MINUTES {1} SECONDS",
+                        timeleft.Minutes, timeleft.Seconds);
+                }
+            }
+
+            else if (DateTime.Now < _mTempUnlock)
             {
                 Unlock();
                 TimeSpan timeleft = _mTempUnlock - DateTime.Now;
