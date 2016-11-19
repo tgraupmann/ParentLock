@@ -116,24 +116,32 @@ namespace ParentLock
             key.SetValue(KEY_PARENT_LOCK_PASSWORD, _mPassword);
             key.Close();
             txtPassword.Text = "";
+            _mUnlocked = false;
+            Lock();
         }
 
         private void btn1Hour_Click(object sender, EventArgs e)
         {
             _mTempUnlock = DateTime.Now + TimeSpan.FromHours(1);
             txtPassword.Text = "";
+            _mUnlocked = false;
+            Lock();
         }
 
         private void btn30Min_Click(object sender, EventArgs e)
         {
             _mTempUnlock = DateTime.Now + TimeSpan.FromMinutes(30);
             txtPassword.Text = "";
+            _mUnlocked = false;
+            Lock();
         }
 
         private void btnLock_Click(object sender, EventArgs e)
         {
             _mTempUnlock = DateTime.Now - TimeSpan.FromSeconds(1);
             txtPassword.Text = "";
+            _mUnlocked = false;
+            Lock();
         }
 
         private void btnExit_Click(object sender, EventArgs e)
@@ -185,11 +193,6 @@ namespace ParentLock
                 this.btn30Min.Enabled = true;
                 this.btn1Hour.Enabled = true;
                 this.btnLock.Enabled = true;
-            }
-            else
-            {
-                _mUnlocked = false;
-                Lock();
             }
         }
     }
