@@ -1,7 +1,7 @@
 # ParentLock
 A Windows Form App to keep the kids on a schedule
 
-~[images_1](images/image_1.png)
+![images_1](images/image_1.png)
 
 * The default password is: 1111
 
