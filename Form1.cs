@@ -12,6 +12,7 @@ namespace ParentLock
         private bool _mUnlocked = false;
         private bool _mCancelExit = true;
         private string _mPassword = "1111"; //default password
+        private DateTime _mTempUnlock = DateTime.MinValue;
 
         private const string KEY_PARENT_LOCK = "PARENT_LOCK";
         private const string KEY_PARENT_LOCK_PASSWORD = "PARENT_LOCK_PASSWORD";
@@ -34,8 +35,7 @@ namespace ParentLock
         {
             this.TopMost = false;
             this.MinimizeBox = true;
-            this.btnSetPassword.Enabled = true;
-            this.btnExit.Enabled = true;
+            this.ShowInTaskbar = true;
         }
 
         private void Lock()
@@ -44,6 +44,10 @@ namespace ParentLock
             this.MinimizeBox = false;
             this.btnSetPassword.Enabled = false;
             this.btnExit.Enabled = false;
+            this.btn30Min.Enabled = false;
+            this.btn1Hour.Enabled = false;
+            this.btnLock.Enabled = false;
+            this.ShowInTaskbar = false;
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -114,6 +118,24 @@ namespace ParentLock
             txtPassword.Text = "";
         }
 
+        private void btn1Hour_Click(object sender, EventArgs e)
+        {
+            _mTempUnlock = DateTime.Now + TimeSpan.FromHours(1);
+            txtPassword.Text = "";
+        }
+
+        private void btn30Min_Click(object sender, EventArgs e)
+        {
+            _mTempUnlock = DateTime.Now + TimeSpan.FromMinutes(30);
+            txtPassword.Text = "";
+        }
+
+        private void btnLock_Click(object sender, EventArgs e)
+        {
+            _mTempUnlock = DateTime.Now - TimeSpan.FromSeconds(1);
+            txtPassword.Text = "";
+        }
+
         private void btnExit_Click(object sender, EventArgs e)
         {
             _mCancelExit = false;
@@ -123,9 +145,31 @@ namespace ParentLock
 
         private void timer1_Tick(object sender, EventArgs e)
         {
-            if (!_mUnlocked)
+            if (DateTime.Now < _mTempUnlock)
             {
-                VolDown();
+                Unlock();
+                TimeSpan timeleft = _mTempUnlock - DateTime.Now;
+                lblPassword.Text = string.Format("TIME LEFT {0} MINUTES {1} SECONDS",
+                    timeleft.Minutes,timeleft.Seconds);
+            }
+
+            else if (_mTempUnlock != DateTime.MinValue)
+            {
+                _mTempUnlock = DateTime.MinValue;
+                this.TopMost = true;
+                txtPassword.Text = "";
+                txtPassword.Focus();
+                _mUnlocked = false;
+                Lock();
+            }
+
+            else
+            {
+                if (!_mUnlocked)
+                {
+                    VolDown();
+                    lblPassword.Text = "PLEASE ENTER YOUR PASSWORD";
+                }
             }
         }
 
@@ -136,10 +180,14 @@ namespace ParentLock
                 lblPassword.Text = "UNLOCKED";
                 _mUnlocked = true;
                 Unlock();
+                this.btnSetPassword.Enabled = true;
+                this.btnExit.Enabled = true;
+                this.btn30Min.Enabled = true;
+                this.btn1Hour.Enabled = true;
+                this.btnLock.Enabled = true;
             }
             else
             {
-                lblPassword.Text = "PLEASE ENTER YOUR PASSWORD";
                 _mUnlocked = false;
                 Lock();
             }
