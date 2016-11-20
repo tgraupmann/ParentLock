@@ -11,6 +11,7 @@ namespace ParentLock
     {
         private bool _mUnlocked = false;
         private bool _mCancelExit = true;
+        private bool _mDialogOpen = false;
         private string _mPassword = "1111"; //default password
         private DateTime _mTempUnlock = DateTime.MinValue;
         private int _mHourAwake = 6;
@@ -23,6 +24,14 @@ namespace ParentLock
         private const int APPCOMMAND_VOLUME_UP = 0xA0000;
         private const int APPCOMMAND_VOLUME_DOWN = 0x90000;
         private const int WM_APPCOMMAND = 0x319;
+
+        private const string MINUTES_5 = "5 Minutes";
+        private const string MINUTES_10 = "10 Minutes";
+        private const string MINUTES_15 = "15 Minutes";
+        private const string MINUTES_30 = "30 Minutes";
+        private const string MINUTES_45 = "45 Minutes";
+        private const string MINUTES_60 = "60 Minutes";
+        private const string MINUTES_90 = "90 Minutes";
 
         [DllImport("user32.dll")]
         public static extern IntPtr SendMessageW(IntPtr hWnd, int Msg,
@@ -46,8 +55,8 @@ namespace ParentLock
             this.MinimizeBox = false;
             this.btnSetPassword.Enabled = false;
             this.btnExit.Enabled = false;
-            this.btn30Min.Enabled = false;
-            this.btn1Hour.Enabled = false;
+            this.btnAddTime.Enabled = false;
+            this.cboTime.Enabled = false;
             this.btnLock.Enabled = false;
             this.ShowInTaskbar = false;
         }
@@ -66,6 +75,17 @@ namespace ParentLock
                     }
                 }
             }
+
+            this.FormBorderStyle = FormBorderStyle.None;
+
+            cboTime.Items.Add(MINUTES_5);
+            cboTime.Items.Add(MINUTES_10);
+            cboTime.Items.Add(MINUTES_15);
+            cboTime.Items.Add(MINUTES_30);
+            cboTime.Items.Add(MINUTES_45);
+            cboTime.Items.Add(MINUTES_60);
+            cboTime.Items.Add(MINUTES_90);
+            cboTime.SelectedIndex = 0;
 
             Lock();
             UpdateLayout();
@@ -109,8 +129,42 @@ namespace ParentLock
             e.Cancel = _mCancelExit;
         }
 
+        public static class Prompt
+        {
+            public static string ShowDialog(string caption, string text)
+            {
+                Form prompt = new Form()
+                {
+                    Width = 500,
+                    Height = 150,
+                    FormBorderStyle = FormBorderStyle.FixedDialog,
+                    Text = caption,
+                    StartPosition = FormStartPosition.CenterScreen
+                };
+                Label textLabel = new Label() { Left = 50, Top = 20, Width = 400, Text = text };
+                TextBox textBox = new TextBox() { Left = 50, Top = 50, Width = 400 };
+                textBox.PasswordChar = '*';
+                Button confirmation = new Button() { Text = "Ok", Left = 350, Width = 100, Top = 70, DialogResult = DialogResult.OK };
+                confirmation.Click += (sender, e) => { prompt.Close(); };
+                prompt.Controls.Add(textBox);
+                prompt.Controls.Add(confirmation);
+                prompt.Controls.Add(textLabel);
+                prompt.AcceptButton = confirmation;
+
+                return prompt.ShowDialog() == DialogResult.OK ? textBox.Text : "";
+            }
+        }
+
         private void btnSetPassword_Click(object sender, EventArgs e)
         {
+            _mDialogOpen = true;
+            string promptValue = Prompt.ShowDialog("Confirm", "Reenter previous password to confirm!");
+            _mDialogOpen = false;
+            if (promptValue != _mPassword)
+            {
+                return;
+            }
+            
             _mPassword = txtPassword.Text;
             Microsoft.Win32.RegistryKey key;
             key = Microsoft.Win32.Registry.CurrentUser.CreateSubKey(KEY_PARENT_LOCK);
@@ -121,34 +175,50 @@ namespace ParentLock
             Lock();
         }
 
-        private void btn1Hour_Click(object sender, EventArgs e)
+        private void btnAddTime_Click(object sender, EventArgs e)
         {
-            if (_mTempUnlock < DateTime.Now)
+            if (null != cboTime.SelectedItem)
             {
-                _mTempUnlock = DateTime.Now + TimeSpan.FromHours(1);
-            }
-            else
-            {
-                _mTempUnlock = _mTempUnlock + TimeSpan.FromHours(1);
-            }
-            txtPassword.Text = "";
-            _mUnlocked = false;
-            Lock();
-        }
+                int minutes = 0;
+                switch ((string)cboTime.SelectedItem)
+                {
+                    case MINUTES_5:
+                        minutes = 5;
+                        break;
+                    case MINUTES_10:
+                        minutes = 10;
+                        break;
+                    case MINUTES_15:
+                        minutes = 15;
+                        break;
+                    case MINUTES_30:
+                        minutes = 30;
+                        break;
+                    case MINUTES_45:
+                        minutes = 45;
+                        break;
+                    case MINUTES_60:
+                        minutes = 60;
+                        break;
+                    case MINUTES_90:
+                        minutes = 90;
+                        break;
+                    default:
+                        return;
+                }
 
-        private void btn30Min_Click(object sender, EventArgs e)
-        {
-            if (_mTempUnlock < DateTime.Now)
-            {
-                _mTempUnlock = DateTime.Now + TimeSpan.FromMinutes(30);
+                if (_mTempUnlock < DateTime.Now)
+                {
+                    _mTempUnlock = DateTime.Now + TimeSpan.FromMinutes(minutes);
+                }
+                else
+                {
+                    _mTempUnlock = _mTempUnlock + TimeSpan.FromMinutes(minutes);
+                }
+                txtPassword.Text = "";
+                _mUnlocked = false;
+                Lock();
             }
-            else
-            {
-                _mTempUnlock = _mTempUnlock + TimeSpan.FromMinutes(30);
-            }
-            txtPassword.Text = "";
-            _mUnlocked = false;
-            Lock();
         }
 
         private void btnLock_Click(object sender, EventArgs e)
@@ -166,18 +236,51 @@ namespace ParentLock
             Application.Exit();
         }
 
-        private bool IsWeekDay()
+        private bool IsAllowedTime()
         {
-            return (DateTime.Now.DayOfWeek == DayOfWeek.Monday ||
+            return (DateTime.Now.DayOfWeek == DayOfWeek.Sunday ||
+                DateTime.Now.DayOfWeek == DayOfWeek.Monday ||
                 DateTime.Now.DayOfWeek == DayOfWeek.Tuesday ||
                 DateTime.Now.DayOfWeek == DayOfWeek.Wednesday ||
                 DateTime.Now.DayOfWeek == DayOfWeek.Thursday ||
-                DateTime.Now.DayOfWeek == DayOfWeek.Friday);
+                DateTime.Now.DayOfWeek == DayOfWeek.Friday ||
+                DateTime.Now.DayOfWeek == DayOfWeek.Saturday);
         }
 
         private void timer1_Tick(object sender, EventArgs e)
         {
-            if (IsWeekDay() &&
+            if (_mDialogOpen)
+            {
+                return;
+            }
+
+            if (DateTime.Now < _mTempUnlock)
+            {
+                Unlock();
+                TimeSpan timeleft = _mTempUnlock - DateTime.Now;
+                if (timeleft.Hours > 0)
+                {
+                    lblPassword.Text = string.Format("UNLOCKED - TIME {0} HOURS {1} MINUTES",
+                        timeleft.Hours, timeleft.Minutes);
+                }
+                else
+                {
+                    lblPassword.Text = string.Format("UNLOCKED - TIME {0} MINUTES {1} SECONDS",
+                        timeleft.Minutes, timeleft.Seconds);
+                }
+            }
+
+            else if (_mTempUnlock != DateTime.MinValue)
+            {
+                _mTempUnlock = DateTime.MinValue;
+                this.TopMost = true;
+                txtPassword.Text = "";
+                txtPassword.Focus();
+                _mUnlocked = false;
+                Lock();
+            }
+
+            else if (IsAllowedTime() &&
                 DateTime.Now.Hour >= _mHourAwake &&
                 DateTime.Now.Hour < _mHourAsleep)
             {
@@ -194,24 +297,6 @@ namespace ParentLock
                     lblPassword.Text = string.Format("NORMAL USE - TIME {0} MINUTES {1} SECONDS",
                         timeleft.Minutes, timeleft.Seconds);
                 }
-            }
-
-            else if (DateTime.Now < _mTempUnlock)
-            {
-                Unlock();
-                TimeSpan timeleft = _mTempUnlock - DateTime.Now;
-                lblPassword.Text = string.Format("TIME LEFT {0} MINUTES {1} SECONDS",
-                    timeleft.Minutes,timeleft.Seconds);
-            }
-
-            else if (_mTempUnlock != DateTime.MinValue)
-            {
-                _mTempUnlock = DateTime.MinValue;
-                this.TopMost = true;
-                txtPassword.Text = "";
-                txtPassword.Focus();
-                _mUnlocked = false;
-                Lock();
             }
 
             else
@@ -233,10 +318,15 @@ namespace ParentLock
                 Unlock();
                 this.btnSetPassword.Enabled = true;
                 this.btnExit.Enabled = true;
-                this.btn30Min.Enabled = true;
-                this.btn1Hour.Enabled = true;
+                this.btnAddTime.Enabled = true;
+                this.cboTime.Enabled = true;
                 this.btnLock.Enabled = true;
             }
+        }
+
+        private void cboTime_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }
