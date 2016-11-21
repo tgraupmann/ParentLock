@@ -124,7 +124,6 @@
             this.cboTime.Name = "cboTime";
             this.cboTime.Size = new System.Drawing.Size(121, 24);
             this.cboTime.TabIndex = 2;
-            this.cboTime.SelectedIndexChanged += new System.EventHandler(this.cboTime_SelectedIndexChanged);
             // 
             // Form1
             // 

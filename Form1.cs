@@ -52,6 +52,7 @@ namespace ParentLock
         private void Lock()
         {
             this.TopMost = true;
+            this.BringToFront();
             this.MinimizeBox = false;
             this.btnSetPassword.Enabled = false;
             this.btnExit.Enabled = false;
@@ -322,11 +323,6 @@ namespace ParentLock
                 this.cboTime.Enabled = true;
                 this.btnLock.Enabled = true;
             }
-        }
-
-        private void cboTime_SelectedIndexChanged(object sender, EventArgs e)
-        {
-
         }
     }
 }
