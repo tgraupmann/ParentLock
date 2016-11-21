@@ -25,6 +25,7 @@ namespace ParentLock
         private const int APPCOMMAND_VOLUME_DOWN = 0x90000;
         private const int WM_APPCOMMAND = 0x319;
 
+        private const string MINUTES_1 = "1 Minute";
         private const string MINUTES_5 = "5 Minutes";
         private const string MINUTES_10 = "10 Minutes";
         private const string MINUTES_15 = "15 Minutes";
@@ -79,6 +80,7 @@ namespace ParentLock
 
             this.FormBorderStyle = FormBorderStyle.None;
 
+            cboTime.Items.Add(MINUTES_1);
             cboTime.Items.Add(MINUTES_5);
             cboTime.Items.Add(MINUTES_10);
             cboTime.Items.Add(MINUTES_15);
@@ -183,6 +185,9 @@ namespace ParentLock
                 int minutes = 0;
                 switch ((string)cboTime.SelectedItem)
                 {
+                    case MINUTES_1:
+                        minutes = 1;
+                        break;
                     case MINUTES_5:
                         minutes = 5;
                         break;
