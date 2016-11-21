@@ -143,7 +143,7 @@
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "Form1";
-            this.ShowInTaskbar = false;
+            this.ShowInTaskbar = true;
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
             this.Text = "Parent Lock";
             this.Load += new System.EventHandler(this.Form1_Load);

@@ -46,21 +46,16 @@ namespace ParentLock
         private void Unlock()
         {
             this.TopMost = false;
-            this.MinimizeBox = true;
-            this.ShowInTaskbar = true;
         }
 
         private void Lock()
         {
             this.TopMost = true;
-            this.BringToFront();
-            this.MinimizeBox = false;
             this.btnSetPassword.Enabled = false;
             this.btnExit.Enabled = false;
             this.btnAddTime.Enabled = false;
             this.cboTime.Enabled = false;
             this.btnLock.Enabled = false;
-            this.ShowInTaskbar = false;
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -310,6 +305,7 @@ namespace ParentLock
                 if (!_mUnlocked)
                 {
                     VolDown();
+                    this.BringToFront();
                     lblPassword.Text = "PLEASE ENTER YOUR PASSWORD";
                 }
             }
