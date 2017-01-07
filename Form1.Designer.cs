@@ -37,6 +37,7 @@
             this.btnAddTime = new System.Windows.Forms.Button();
             this.btnLock = new System.Windows.Forms.Button();
             this.cboTime = new System.Windows.Forms.ComboBox();
+            this.btnMinimize = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // lblPassword
@@ -125,12 +126,24 @@
             this.cboTime.Size = new System.Drawing.Size(121, 24);
             this.cboTime.TabIndex = 2;
             // 
+            // btnMinimize
+            // 
+            this.btnMinimize.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnMinimize.Location = new System.Drawing.Point(1334, 120);
+            this.btnMinimize.Name = "btnMinimize";
+            this.btnMinimize.Size = new System.Drawing.Size(105, 29);
+            this.btnMinimize.TabIndex = 3;
+            this.btnMinimize.Text = "MINIMIZE";
+            this.btnMinimize.UseVisualStyleBackColor = true;
+            this.btnMinimize.Click += new System.EventHandler(this.btnMinimize_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1477, 354);
             this.ControlBox = false;
+            this.Controls.Add(this.btnMinimize);
             this.Controls.Add(this.cboTime);
             this.Controls.Add(this.txtPassword);
             this.Controls.Add(this.btnSetPassword);
@@ -138,15 +151,16 @@
             this.Controls.Add(this.btnAddTime);
             this.Controls.Add(this.btnExit);
             this.Controls.Add(this.lblPassword);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Margin = new System.Windows.Forms.Padding(4);
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "Form1";
-            this.ShowInTaskbar = true;
+            this.ShowIcon = false;
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
             this.Text = "Parent Lock";
             this.Load += new System.EventHandler(this.Form1_Load);
+            this.GotFocus += new System.EventHandler(this.Form1_GotFocus);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -162,6 +176,7 @@
         private System.Windows.Forms.Button btnAddTime;
         private System.Windows.Forms.Button btnLock;
         private System.Windows.Forms.ComboBox cboTime;
+        private System.Windows.Forms.Button btnMinimize;
     }
 }
 

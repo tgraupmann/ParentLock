@@ -14,6 +14,7 @@ namespace ParentLock
         private bool _mDialogOpen = false;
         private string _mPassword = "1111"; //default password
         private DateTime _mTempUnlock = DateTime.MinValue;
+        private DateTime _mMinimizeTimer = DateTime.MinValue;
         private int _mHourAwake = 6;
         private int _mHourAsleep = 22;
 
@@ -46,6 +47,7 @@ namespace ParentLock
         private void Unlock()
         {
             this.TopMost = false;
+            this.btnMinimize.Enabled = true;
         }
 
         private void Lock()
@@ -56,6 +58,7 @@ namespace ParentLock
             this.btnAddTime.Enabled = false;
             this.cboTime.Enabled = false;
             this.btnLock.Enabled = false;
+            this.btnMinimize.Enabled = false;
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -73,8 +76,6 @@ namespace ParentLock
                 }
             }
 
-            this.FormBorderStyle = FormBorderStyle.None;
-
             cboTime.Items.Add(MINUTES_1);
             cboTime.Items.Add(MINUTES_5);
             cboTime.Items.Add(MINUTES_10);
@@ -91,12 +92,25 @@ namespace ParentLock
             this.timer1.Start();
         }
 
+        private void Form1_GotFocus(object sender, EventArgs e)
+        {
+            if (DateTime.Now < _mMinimizeTimer)
+            {
+                //ignore
+                return;
+            }
+            UpdateLayout();
+            WindowState = FormWindowState.Normal;
+            this.TopMost = false;
+        }
+
         private void UpdateLayout()
         {
             this.Location = new Point(Screen.PrimaryScreen.Bounds.X,
                 Screen.PrimaryScreen.Bounds.Y);
             this.Width = Screen.PrimaryScreen.Bounds.Width;
             this.Height = Screen.PrimaryScreen.Bounds.Height;
+            this.WindowState = FormWindowState.Maximized;
         }
 
         private void Mute()
@@ -119,6 +133,11 @@ namespace ParentLock
 
         protected override void OnMove(EventArgs e)
         {
+            if (DateTime.Now < _mMinimizeTimer)
+            {
+                //ignore
+                return;
+            }
             UpdateLayout();
         }
 
@@ -324,6 +343,12 @@ namespace ParentLock
                 this.cboTime.Enabled = true;
                 this.btnLock.Enabled = true;
             }
+        }
+
+        private void btnMinimize_Click(object sender, EventArgs e)
+        {
+            _mMinimizeTimer = DateTime.Now + TimeSpan.FromSeconds(3);
+            this.WindowState = FormWindowState.Minimized;
         }
     }
 }
